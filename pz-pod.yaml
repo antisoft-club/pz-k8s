@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  namespace: pz
+  namespace: project-zomboid
   name: pz-server
-  label:
+  labels:
     app: pz-server
 spec:
   containers:
@@ -12,5 +12,5 @@ spec:
     ports:
     - containerPort: 16261
       protocol: UDP
-    - contianerPort: 16262
+    - containerPort: 16262
       protocol: UDP
