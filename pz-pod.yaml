@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: pz
+  name: pz-server
+  label:
+    app: pz-server
+spec:
+  containers:
+  - name: pz-server
+    image: ghcr.io/antisoft-club/project-zomboid-container@sha256:9697bc11ae83bac9fce0fdbdeda8c117d076f8d192d9c2945ed9e090a6154bd5
+    ports:
+    - containerPort: 16261
+      protocol: UDP
+    - contianerPort: 16262
+      protocol: UDP
