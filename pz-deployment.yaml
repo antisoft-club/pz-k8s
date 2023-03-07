@@ -64,8 +64,6 @@ spec:
       initContainers:
       - name: take-data-dir-ownership
         image: alpine:3
-        # Give `grafana` user (id 472) permissions a mounted volume
-        # https://github.com/grafana/grafana-docker/blob/master/Dockerfile
         command:
         - chown
         - -R
@@ -74,11 +72,17 @@ spec:
         volumeMounts:
         - name: pz-data
           mountPath: /pz-data/
+      - name: generate-random-admin-password
+        image: alpine:3
+        command: ['sh', '-c', 'echo $RANDOM | md5sum | head -c 20 > /pz-data/pass.txt']
+        volumeMounts:
+        - name: pz-data
+          mountPath: /pz-data/
 
       containers:
       - name: pz-server
         image: ghcr.io/antisoft-club/project-zomboid-container@sha256:9697bc11ae83bac9fce0fdbdeda8c117d076f8d192d9c2945ed9e090a6154bd5
-        args: ["-adminpassword", "hello"]
+        args: ["-adminpassword", "$(cat /pz-data/pass.txt)"]
         ports:
         - containerPort: 16261
           protocol: UDP
