@@ -1,8 +1,54 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: project-zomboid
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: project-zomboid
+  name: pz-data
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: linode-block-storage-retain
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: project-zomboid
+  name: pz-service
+  labels:
+    app: pz-service
+spec:
+  type: NodePort
+  ports:
+  - name: pz-connection
+    port: 16261
+    protocol: UDP
+    targetPort: 16261
+    nodePort: 32000
+  - name: pz-connection-direct
+    port: 16262
+    protocol: UDP
+    targetPort: 16262
+    nodePort: 32001
+  selector:
+    app: pz-deployment
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: project-zomboid
-  name: pz-server-deployment
+  name: pz-deployment
   labels:
     app: pz-server
 spec:
@@ -18,8 +64,21 @@ spec:
       containers:
       - name: pz-server
         image: ghcr.io/antisoft-club/project-zomboid-container@sha256:9697bc11ae83bac9fce0fdbdeda8c117d076f8d192d9c2945ed9e090a6154bd5
+        args: ["-adminpassword", "hello"]
         ports:
         - containerPort: 16261
           protocol: UDP
         - containerPort: 16262
           protocol: UDP
+        resources:
+          requests:
+            memory: "2G"
+            cpu: "250m"
+        volumeMounts:
+        - name: pz-data
+          mountPath: /pz-data/
+      volumes:
+      - name: pz-data
+        persistentVolumeClaim:
+          claimName: pz-data
+
